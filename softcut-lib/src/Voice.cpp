@@ -93,14 +93,15 @@ void Voice:: processBlockMono(const float *in, float *out, int numFrames) {
     
     rawPhase.store(sch.getActivePhase(), std::memory_order_relaxed);
 
-    if(recFlag) {
-        if (sch.getRecOnceDone()) {
-            // record once is finished, turn off recording flag
-            // and reset the recording subheads
-	    recFlag = false;
-            sch.setRecOnceFlag(false);
-        }
-    }
+// // FIXME..
+//     if(recFlag) {
+//         if (sch.getRecOnceDone()) {
+//             // record once is finished, turn off recording flag
+//             // and reset the recording subheads
+// 	    recFlag = false;
+//             sch.setRecOnceFlag(false);
+//         }
+//     }
 }
 
 void Voice::setSampleRate(float hz) {
@@ -143,15 +144,15 @@ void Voice::setPreLevel(float amp) {
 }
 
 void Voice::setRecFlag(bool val) {
-    // if (recFlag) {
-    //     if (!(val || playFlag)) {
-    //         sch.stop();
-    //     }
-    // } else {
-    //     if (val && !playFlag) {
-    //         sch.run();
-    //     }
-    // }
+    if (recFlag) {
+        if (!(val || playFlag)) {
+            sch.stop();
+        }
+    } else {
+        if (val && !playFlag) {
+            sch.run();
+        }
+    }
     recFlag = val;
     if (val) {
         sch.enableWrite();
@@ -165,15 +166,15 @@ void Voice::setRecFlag(bool val) {
 }
 
 void Voice::setPlayFlag(bool val) {
-    // if (playFlag) {
-    //     if (!(val || recFlag)) {
-    //         sch.stop();
-    //     }
-    // } else {
-    //     if (val && !recFlag) {
-    //         sch.run();
-    //     }
-    // }
+    if (playFlag) {
+        if (!(val || recFlag)) {
+            sch.stop();
+        }
+    } else {
+        if (val && !recFlag) {
+            sch.run();
+        }
+    }
     playFlag = val;
 }
 

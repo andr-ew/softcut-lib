@@ -31,6 +31,8 @@ namespace softcut {
         void setLoopEnd(float sec);
 
         void setLoopFlag(bool val);
+        
+        void setLoopPingPong(bool val);
 
         void setFadeTime(float sec);
 

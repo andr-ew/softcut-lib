@@ -52,6 +52,9 @@ namespace softcut {
         void setLoopFlag(int voice, bool val) {
             scv[voice].setLoopFlag(val);
         }
+        void setLoopPingPong(int voice, bool val) {
+            scv[voice].setLoopPingPong(val);
+        }
 
         void setFadeTime(int voice, float sec) {
             scv[voice].setFadeTime(sec);

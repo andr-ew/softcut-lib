@@ -57,10 +57,11 @@ class ReadWriteHead {
     void setFadeTime(float secs);
     // enable or disable looping between region endpoints
     void setLoopFlag(bool val);
+    void setLoopPingPong(bool val);
 
     void setRecOnceFlag(bool val);
-    bool getRecOnceDone();
-    bool getRecOnceActive();
+    // bool getRecOnceDone();
+    // bool getRecOnceActive();
 
     // set amplitudes
     void setRec(float x);

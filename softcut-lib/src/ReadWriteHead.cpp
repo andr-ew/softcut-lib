@@ -52,7 +52,7 @@ void ReadWriteHead::processSample(sample_t in, sample_t *out) {
     // }
 
     for (int i=0; i<2; ++i) { 
-        if (loopState.subWriteEnable[i]) { head[i].poke(in, pre,  rec); }
+        if (loopState.subWriteEnable[i] && head[i].state_ != Stopped) { head[i].poke(in, pre,  rec); }
     }
     
     takeAction(head[0].updatePhase(start, end, loopFlag), 0);
@@ -80,7 +80,7 @@ void ReadWriteHead::processSampleNoRead(sample_t in, sample_t *out) {
     // }
 
     for (int i=0; i<2; ++i) { 
-        if (loopState.subWriteEnable[i]) { head[i].poke(in, pre,  rec); }
+        if (loopState.subWriteEnable[i] && head[i].state_ != Stopped) { head[i].poke(in, pre,  rec); }
     }
 
     takeAction(head[0].updatePhase(start, end, loopFlag), 0);
@@ -125,6 +125,10 @@ void ReadWriteHead::setLoopEndSeconds(float x)
 {
     end = x * sr;
     queuedCrossfadeFlag = false;
+}
+
+void ReadWriteHead::setLoopPingPong(bool val) {
+    loopState.pingPongFlag = val;
 }
 
 void ReadWriteHead::takeAction(Action act, int head)
@@ -191,8 +195,9 @@ bool ReadWriteHead::LoopState::checkPingPong(int activeHead) {
             pingPongHead = -1;
             return false;
         }
+    } else {
+        return false;
     }
-    return false;
 }
 
 // int ReadWriteHead::LoopState::handleAction(Action act, int head) { 
@@ -295,6 +300,7 @@ void ReadWriteHead::setRecOnceFlag(bool val) {
     // recOnceDone = false;
     // recOnceHead = -1;
     loopState.recOnceFlag = val;
+    loopState.recOnceHead = -1;
 }
 
 // bool ReadWriteHead::getRecOnceDone() {

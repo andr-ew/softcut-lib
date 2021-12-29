@@ -93,7 +93,7 @@ void Voice:: processBlockMono(const float *in, float *out, int numFrames) {
     
     rawPhase.store(sch.getActivePhase(), std::memory_order_relaxed);
 
-// // FIXME..
+// // FIXME..?
 //     if(recFlag) {
 //         if (sch.getRecOnceDone()) {
 //             // record once is finished, turn off recording flag
@@ -180,6 +180,11 @@ void Voice::setPlayFlag(bool val) {
 
 void Voice::setLoopFlag(bool val) {
     sch.setLoopFlag(val);
+}
+
+
+void Voice::setLoopPingPong(bool val) {
+    sch.setLoopPingPong(val);
 }
 
 // input filter

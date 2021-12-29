@@ -55,6 +55,8 @@ namespace softcut {
         // **NB** buffer size must be a power of two!!!!
         void setBuffer(sample_t *buf, unsigned int frames);
         void setRate(rate_t rate);
+        void setRateSign(rate_t sign);
+        
         FadeCurves *fadeCurves;
 
     private:
@@ -68,6 +70,7 @@ namespace softcut {
 
         State state_;
         rate_t rate_;
+        rate_t rate_sign_;
         int inc_dir_;
         phase_t phase_;
         float fade_;

@@ -143,34 +143,37 @@ void Voice::setPreLevel(float amp) {
 }
 
 void Voice::setRecFlag(bool val) {
-    if (recFlag) {
-	if (!(val || playFlag)) {
-	    sch.stop();
-	}
-    } else {
-	if (val && !playFlag) {
-	    sch.run();
-	}
-    }
+    // if (recFlag) {
+    //     if (!(val || playFlag)) {
+    //         sch.stop();
+    //     }
+    // } else {
+    //     if (val && !playFlag) {
+    //         sch.run();
+    //     }
+    // }
     recFlag = val;
-    if (!val) {
-	// turn off rec once if active
-        if (sch.getRecOnceActive()) {
-	    setLoopFlag(false);
-	}
+    if (val) {
+        sch.enableWrite();
+    } else {
+        sch.setRecOnceFlag(false);
+	// // turn off rec once if active
+    //     if (sch.getRecOnceActive()) {
+    //         setLoopFlag(false);
+    //     }
     }
 }
 
 void Voice::setPlayFlag(bool val) {
-    if (playFlag) {
-	if (!(val || recFlag)) {
-	    sch.stop();
-	}
-    } else {
-	if (val && !recFlag) {
-	    sch.run();
-	}
-    }
+    // if (playFlag) {
+    //     if (!(val || recFlag)) {
+    //         sch.stop();
+    //     }
+    // } else {
+    //     if (val && !recFlag) {
+    //         sch.run();
+    //     }
+    // }
     playFlag = val;
 }
 

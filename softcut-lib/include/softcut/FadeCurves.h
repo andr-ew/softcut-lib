@@ -3,11 +3,10 @@
 //
 // static class for producing curves in fade period
 //
-// FIXME: this should be an object owned by SoftcutHead, passed to child SubHeads
 
 
-#ifndef Softcut_FADECURVES_H
-#define Softcut_FADECURVES_H
+#ifndef _SOFTCUT_FADECURVES_H_
+#define _SOFTCUT_FADECURVES_H_
 
 namespace softcut {
 
@@ -51,4 +50,4 @@ namespace softcut {
     };
 }
 
-#endif //Softcut_FADECURVES_H
+#endif //_SOFTCUT_FADECURVES_H_

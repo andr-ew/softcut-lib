@@ -20,6 +20,7 @@ void SubHead::init(FadeCurves *fc) {
     resamp_.setPhase(0);
     inc_dir_ = 1;
     recOffset_ = -8;
+    rate_sign_ = 1;
 }
 
 Action SubHead::updatePhase(phase_t start, phase_t end, bool loop) {
@@ -32,7 +33,6 @@ Action SubHead::updatePhase(phase_t start, phase_t end, bool loop) {
         case Playing:
             p = phase_ + rate_;
             if(active_) {
-                // FIXME: should refactor this a bit.
                 if (rate_ > 0.f) {
                     if (p > end || p < start) {
                         if (loop) {
@@ -149,7 +149,7 @@ float SubHead::peek4() {
 
 unsigned int SubHead::wrapBufIndex(int x) {
     x += bufFrames_;
-    BOOST_ASSERT_MSG(x >= 0, "buffer index before masking is non-negative");
+    BOOST_ASSERT_MSG(x >= 0, "buffer index before masking must be non-negative");
     return x & bufMask_;
 }
 
@@ -176,13 +176,16 @@ void SubHead::setBuffer(float *buf, unsigned int frames) {
 }
 
 void SubHead::setRate(rate_t rate) {
-    rate_ = rate;
-    inc_dir_ = boost::math::sign(rate);
+    rate_ = rate * rate_sign_;
+    inc_dir_ = boost::math::sign(rate_);
     // NB: resampler doesn't handle negative rates.
     // instead we copy the resampler output backwards into the buffer when rate < 0.
     resamp_.setRate(std::fabs(rate));
 }
 
+void SubHead::setRateSign(rate_t sign) {
+    rate_sign_ = sign > 0 ? 1 : -1;
+}
 
 void SubHead::setState(State state) {
     state_ = state;

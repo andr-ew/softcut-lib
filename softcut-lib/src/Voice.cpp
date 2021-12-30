@@ -54,30 +54,30 @@ void Voice::reset() {
 }
 
 void Voice:: processBlockMono(const float *in, float *out, int numFrames) {
-    std::function<void(sample_t, sample_t*)> sampleFunc;
-    if(playFlag) {
-        if(recFlag) {
-            sampleFunc = [this](float in, float* out) {
-                this->sch.processSample(in, out);
-            };
-        } else {
-            sampleFunc = [this](float in, float* out) {
-                this->sch.processSampleNoWrite(in, out);
-            };
-        }
-    } else {
-        if(recFlag) {
-            sampleFunc = [this](float in, float* out) {
-                this->sch.processSampleNoRead(in, out);
-            };
-        } else {
-            // FIXME? do nothing, i guess?
-            sampleFunc = [](float in, float* out) {
-                (void)in;
-                (void)out;
-            };
-        }
-    }
+    //std::function<void(sample_t, sample_t*)> sampleFunc;
+    // if(playFlag) {
+    //     if(recFlag) {
+    //         sampleFunc = [this](float in, float* out) {
+    //             this->sch.processSample(in, out);
+    //         };
+    //     } else {
+    //         sampleFunc = [this](float in, float* out) {
+    //             this->sch.processSampleNoWrite(in, out);
+    //         };
+    //     }
+    // } else {
+    //     if(recFlag) {
+    //         sampleFunc = [this](float in, float* out) {
+    //             this->sch.processSampleNoRead(in, out);
+    //         };
+    //     } else {
+    //         // FIXME? do nothing, i guess?
+    //         sampleFunc = [](float in, float* out) {
+    //             (void)in;
+    //             (void)out;
+    //         };
+    //     }
+    // }
 
     float x, y;
     for(int i=0; i<numFrames; ++i) {
@@ -85,7 +85,10 @@ void Voice:: processBlockMono(const float *in, float *out, int numFrames) {
         sch.setRate(rateRamp.update());
         sch.setPre(preRamp.update());
         sch.setRec(recRamp.update());
-        sampleFunc(x, &y);
+        
+        //sampleFunc(x, &y);
+        this->sch.processSample(x, &y);
+
 	    out[i] = svfPost.getNextSample(y) + y*svfPostDryLevel;
         updateQuantPhase();
     }
@@ -144,20 +147,21 @@ void Voice::setPreLevel(float amp) {
 }
 
 void Voice::setRecFlag(bool val) {
-    if (recFlag) {
-        if (!(val || playFlag)) {
-            sch.stop();
-        }
-    } else {
-        if (val && !playFlag) {
-            sch.run();
-        }
-    }
     recFlag = val;
+    // if (recFlag) {
+    //     if (!(val || playFlag)) {
+    //         sch.stop();
+    //     }
+    // } else {
+    //     if (val && !playFlag) {
+    //         sch.run();
+    //     }
+    // }
     if (val) {
         sch.enableWrite();
     } else {
         sch.setRecOnceFlag(false);
+        sch.disableWrite();
 	// // turn off rec once if active
     //     if (sch.getRecOnceActive()) {
     //         setLoopFlag(false);
@@ -166,16 +170,21 @@ void Voice::setRecFlag(bool val) {
 }
 
 void Voice::setPlayFlag(bool val) {
-    if (playFlag) {
-        if (!(val || recFlag)) {
-            sch.stop();
-        }
-    } else {
-        if (val && !recFlag) {
-            sch.run();
-        }
-    }
+    // if (playFlag) {
+    //     if (!(val || recFlag)) {
+    //         sch.stop();
+    //     }
+    // } else {
+    //     if (val && !recFlag) {
+    //         sch.run();
+    //     }
+    // }
     playFlag = val;
+    if (playFlag) { 
+        sch.enableRead();
+    } else {
+        sch.disableRead();
+    }
 }
 
 void Voice::setLoopFlag(bool val) {

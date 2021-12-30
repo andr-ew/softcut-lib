@@ -42,8 +42,8 @@ class ReadWriteHead {
 
     // per-sample update functions
     void processSample(sample_t in, sample_t *out);
-    void processSampleNoRead(sample_t in, sample_t *out);
-    void processSampleNoWrite(sample_t in, sample_t *out);
+    // void processSampleNoRead(sample_t in, sample_t *out);
+    // void processSampleNoWrite(sample_t in, sample_t *out);
 
     void setSampleRate(float sr);
     void setBuffer(sample_t *buf, uint32_t size);
@@ -74,8 +74,14 @@ class ReadWriteHead {
     void stop();
     // immediately start playing  from current position (no fadein)
     void run();
-    // (re-)enable both subheads for writing
+
+    // (re-)enable/disable both subheads for writing
     void enableWrite();
+    void disableWrite();
+
+    // (re-)enable/disable both subheads for reading
+    void enableRead();
+    void disableRead();
 
     // set delay between read and write heads, in samples
     // (negative offset means write head is placed before read head; this is the default)
@@ -101,7 +107,9 @@ class ReadWriteHead {
 
   private:
     SubHead head[2];
-
+    LoopState loopState;
+    bool readEnable;
+    
     sample_t *buf; // audio buffer (allocated elsewhere)
     float sr;      // sample rate
     phase_t start; // start/end points
@@ -116,8 +124,6 @@ class ReadWriteHead {
     bool loopFlag; // set to loop, unset for 1-shot
     float pre;     // pre-record level
     float rec;     // record level
-
-    LoopState loopState;
 
     rate_t rate; // current rate
     TestBuffers testBuf;

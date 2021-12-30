@@ -26,6 +26,7 @@ void ReadWriteHead::init(FadeCurves *fc) {
     head[1].init(fc);
     // subWriteEnable[0]=true;
     // subWriteEnable[1]=true;
+    readEnable = true;
 }
 
 ReadWriteHead::LoopState::LoopState() { 
@@ -38,7 +39,11 @@ ReadWriteHead::LoopState::LoopState() {
 }
 
 void ReadWriteHead::processSample(sample_t in, sample_t *out) {
-    *out = mixFade(head[0].peek(), head[1].peek(), head[0].fade(), head[1].fade());
+    if (readEnable) { 
+        *out = mixFade(head[0].peek(), head[1].peek(), head[0].fade(), head[1].fade());
+    } else {
+        *out = 0;
+    }
 
     BOOST_ASSERT_MSG(!(head[0].state_ == Playing && head[1].state_ == Playing), "multiple active heads");
 
@@ -50,37 +55,14 @@ void ReadWriteHead::processSample(sample_t in, sample_t *out) {
     //     head[0].poke(in, pre, rec);
     //     head[1].poke(in, pre, rec);
     // }
-
-    for (int i=0; i<2; ++i) { 
-        if (loopState.subWriteEnable[i] && head[i].state_ != Stopped) { head[i].poke(in, pre,  rec); }
-    }
     
-    takeAction(head[0].updatePhase(start, end, loopFlag), 0);
-    takeAction(head[1].updatePhase(start, end, loopFlag), 1);
-
-    head[0].updateFade(fadeInc);
-    head[1].updateFade(fadeInc);
-
-    dequeueCrossfade();
-}
-
-
-void ReadWriteHead::processSampleNoRead(sample_t in, sample_t *out) {
-    (void)out;
-
-    BOOST_ASSERT_MSG(!(head[0].state_ == Playing && head[1].state_ == Playing), "multiple active heads");
-
-    // if (recOnceFlag || recOnceDone || (recOnceHead > -1)) {
-    //     if (recOnceHead > -1) {
-    //         head[recOnceHead].poke(in, pre, rec);
-    //     }
-    // } else {
-    //     head[0].poke(in, pre, rec);
-    //     head[1].poke(in, pre, rec);
-    // }
-
     for (int i=0; i<2; ++i) { 
-        if (loopState.subWriteEnable[i] && head[i].state_ != Stopped) { head[i].poke(in, pre,  rec); }
+        // should always prime the ringbuffer with new input
+        // otherwise potential click at loop point when recording with rate >1
+        int nframes = head[i].prime(in);
+        if (loopState.subWriteEnable[i] && head[i].state_ != Stopped) { 
+            head[i].poke(nframes, pre,  rec);
+        }
     }
 
     takeAction(head[0].updatePhase(start, end, loopFlag), 0);
@@ -92,20 +74,42 @@ void ReadWriteHead::processSampleNoRead(sample_t in, sample_t *out) {
     dequeueCrossfade();
 }
 
-void ReadWriteHead::processSampleNoWrite(sample_t in, sample_t *out) {
-    (void)in;
-    *out = mixFade(head[0].peek(), head[1].peek(), head[0].fade(), head[1].fade());
 
-    BOOST_ASSERT_MSG(!(head[0].state_ == Playing && head[1].state_ == Playing), "multiple active heads");
+// void ReadWriteHead::processSampleNoRead(sample_t in, sample_t *out) {
+//     (void)out;
 
-    takeAction(head[0].updatePhase(start, end, loopFlag), 0);
-    takeAction(head[1].updatePhase(start, end, loopFlag), 1);
+//     BOOST_ASSERT_MSG(!(head[0].state_ == Playing && head[1].state_ == Playing), "multiple active heads");
 
-    head[0].updateFade(fadeInc);
-    head[1].updateFade(fadeInc);
+//     for (int i=0; i<2; ++i) { 
+//         int nframes = head[i].prime(in);
+//         if (loopState.subWriteEnable[i] && head[i].state_ != Stopped) { 
+//             head[i].poke(nframes, pre,  rec);
+//         }
+//     }
+
+//     takeAction(head[0].updatePhase(start, end, loopFlag), 0);
+//     takeAction(head[1].updatePhase(start, end, loopFlag), 1);
+
+//     head[0].updateFade(fadeInc);
+//     head[1].updateFade(fadeInc);
+
+//     dequeueCrossfade();
+// }
+
+// void ReadWriteHead::processSampleNoWrite(sample_t in, sample_t *out) {
+//     (void)in;
+//     *out = mixFade(head[0].peek(), head[1].peek(), head[0].fade(), head[1].fade());
+
+//     BOOST_ASSERT_MSG(!(head[0].state_ == Playing && head[1].state_ == Playing), "multiple active heads");
+
+//     takeAction(head[0].updatePhase(start, end, loopFlag), 0);
+//     takeAction(head[1].updatePhase(start, end, loopFlag), 1);
+
+//     head[0].updateFade(fadeInc);
+//     head[1].updateFade(fadeInc);
     
-    dequeueCrossfade();
-}
+//     dequeueCrossfade();
+// }
 
 void ReadWriteHead::setRate(rate_t x)
 {
@@ -321,7 +325,7 @@ sample_t ReadWriteHead::mixFade(sample_t x, sample_t y, float a, float b) {
         return x * sinf(a * (float)M_PI_2) + y * sinf(b * (float) M_PI_2);
 }
 
-void ReadWriteHead::setRec(float x) {
+void ReadWriteHead::setRec(float x) { 
     rec = x;
 }
 
@@ -363,4 +367,21 @@ void ReadWriteHead::run() {
 void ReadWriteHead::enableWrite() {
     loopState.subWriteEnable[0] = true;
     loopState.subWriteEnable[1] = true;
+}
+
+void ReadWriteHead::disableWrite() {
+    loopState.subWriteEnable[0] = false;
+    loopState.subWriteEnable[1] = false;
+}
+
+void ReadWriteHead::enableRead() {
+//     loopState.subReadEnable[0] = true;
+//     loopState.subReadEnable[1] = true;
+    readEnable = true;
+}
+
+void ReadWriteHead::disableRead() {
+    readEnable = false;
+    // loopState.subReadEnable[0] = false;
+    // loopState.subReadEnable[1] = false;
 }

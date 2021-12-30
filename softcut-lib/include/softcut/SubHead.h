@@ -33,11 +33,12 @@ namespace softcut {
     protected:
         static constexpr int blockSize = 2048;
         sample_t peek();
-        //! poke
-        //! @param in: input value
-        //! @param pre: scaling level for previous buffer content
-        //! @param rec: scaling level for new content
-        void poke(sample_t in, float pre, float rec);
+
+        // push input sample for resampling
+        // returns count of resampled frames
+        int prime(sample_t in);
+        // perform write
+        void poke(int nframes, float pre, float rec);
         Action updatePhase(phase_t start, phase_t end, bool loop);
         void updateFade(float inc);
 
@@ -56,7 +57,7 @@ namespace softcut {
         void setBuffer(sample_t *buf, unsigned int frames);
         void setRate(rate_t rate);
         void setRateSign(rate_t sign);
-        
+
         FadeCurves *fadeCurves;
 
     private:

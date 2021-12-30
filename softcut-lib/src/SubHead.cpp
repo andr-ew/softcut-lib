@@ -86,22 +86,19 @@ void SubHead::updateFade(float inc) {
     }
 }
 
-#if 0
-/// test: no resampling
-void Subhead::poke(float in, float pre, float rec, int numFades) {
-    sample_t* p = &buf_[static_cast<unsigned int>(phase_)&bufMask_];
-    *p *= pre;
-    *p += (in * rec);
+int SubHead::prime(sample_t in) {
+    return resamp_.processFrame(in);
 }
-#else
-void SubHead::poke(float in, float pre, float rec) {
-    // FIXME: since there's never really a reason to not push input, or to reset input ringbuf,
-    // it follows that all resamplers could share an input ringbuf
-    int nframes = resamp_.processFrame(in);
 
-    if(state_ == Stopped) {
-        return;
-    }
+// #if 0
+// /// test: no resampling
+// void Subhead::poke(float in, float pre, float rec, int numFades) {
+//     sample_t* p = &buf_[static_cast<unsigned int>(phase_)&bufMask_];
+//     *p *= pre;
+//     *p += (in * rec);
+// }
+// #else
+void SubHead::poke(int nframes, float pre, float rec) {
 
     BOOST_ASSERT_MSG(fade_ >= 0.f && fade_ <= 1.f, "bad fade coefficient in poke()");
 
@@ -114,7 +111,7 @@ void SubHead::poke(float in, float pre, float rec) {
     for(int i=0; i<nframes; ++i) {
         y = src[i];
 
-#if 1 // soft clipper
+#if 0 // soft clipper
         y = clip_.processSample(y);
 #endif
 #if 0 // lowpass filter
@@ -126,7 +123,7 @@ void SubHead::poke(float in, float pre, float rec) {
         wrIdx_ = wrapBufIndex(wrIdx_ + inc_dir_);
     }
 }
-#endif
+// #endif
 
 float SubHead::peek() {
     return peek4();

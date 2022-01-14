@@ -86,10 +86,11 @@ void SubHead::updateFade(float inc) {
     }
 }
 
-#if 0
+#if 1
 /// test: no resampling
-void Subhead::poke(float in, float pre, float rec, int numFades) {
+void SubHead::poke(float in, float pre, float rec) {
     sample_t* p = &buf_[static_cast<unsigned int>(phase_)&bufMask_];
+    /* *p = clip_.processSample(*p); */
     *p *= pre;
     *p += (in * rec);
 }

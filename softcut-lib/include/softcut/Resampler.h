@@ -17,7 +17,7 @@
 
 // uncomment to use linear interpolation. honestly can't hear a huge difference?
 // FIXME: should be template param i guess
-#define RESAMPLER_INTERPOLATE_LINEAR
+//#define RESAMPLER_INTERPOLATE_LINEAR
 
 namespace softcut {
 
@@ -105,6 +105,9 @@ namespace softcut {
         sample_t interpolate(phase_t f){
 #ifdef RESAMPLER_INTERPOLATE_LINEAR
             return x_1_ + (x_ - x_1_) * f;
+            
+            //testing zero-order interpolation
+            //return x_;
 #else
             unsigned int i0, i1, i2, i3;
             i0 = (inBufIdx_ + 1) & IN_BUF_MASK;

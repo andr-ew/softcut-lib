@@ -86,7 +86,7 @@ void SubHead::updateFade(float inc) {
     }
 }
 
-#if 1
+#if 0
 /// test: no resampling
 void SubHead::poke(float in, float pre, float rec) {
     sample_t* p = &buf_[static_cast<unsigned int>(phase_)&bufMask_];

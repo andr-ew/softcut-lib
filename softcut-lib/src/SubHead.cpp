@@ -86,7 +86,7 @@ void SubHead::updateFade(float inc) {
     }
 }
 
-#if 0
+#if 1
 /// test: no resampling
 void SubHead::poke(float in, float pre, float rec) {
     sample_t* p = &buf_[static_cast<unsigned int>(phase_)&bufMask_];
@@ -147,7 +147,7 @@ float SubHead::peek4() {
     auto x = static_cast<float>(phase_ - (float)phase1);
     //return Interpolate::hermite<float>(x, y0, y1, y2, y3);
     //test 0-order playback
-    return y1
+    return y1;
 }
 
 unsigned int SubHead::wrapBufIndex(int x) {

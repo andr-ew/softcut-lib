@@ -145,7 +145,9 @@ float SubHead::peek4() {
     float y2 = buf_[wrapBufIndex(phase2)];
 
     auto x = static_cast<float>(phase_ - (float)phase1);
-    return Interpolate::hermite<float>(x, y0, y1, y2, y3);
+    //return Interpolate::hermite<float>(x, y0, y1, y2, y3);
+    //test 0-order playback
+    return y1
 }
 
 unsigned int SubHead::wrapBufIndex(int x) {
